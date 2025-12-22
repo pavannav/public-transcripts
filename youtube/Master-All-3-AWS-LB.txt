@@ -1,0 +1,1131 @@
+
+Master All 3 AWS Load Balancers - Full Course: Rahul Wagh
+---------------------------------------------- Rahul Wagh
+
+Hello there and in this session we are going to cover all the types of a load balancers which are present in AWS along
+with the demo. So first we are going to begin with the application load balancer. Second we are going to take a
+look onto the network load balancer and third we are going to take a look onto the gateway load balancer and all the
+load balancers demos uh timestamps are present into the description section. So if you're interested in learning any
+specific load balancer then you can jump to that specific section and all the demos are independent of each other. So
+you just you can just skip any of the part which you are not interested in learning. So let's get back to the uh
+screen and start with our load balancer. And first we are going to begin with our application load
+Application Load Balancer
+balancer. Before we jump into the demo, it's good idea to take a look onto our targeted architecture which we are going
+to implement. So at a first glance this particular diagram might look complicated to you but we are going to
+break down this whole diagram into each block. So here on the left hand side uh you will see this is a user which will
+try to access our application load balancer and from there uh application load balancer is going to share the load
+between the EC2 instances and these EC2 instances are running into the public subnet and these public subnet is
+present inside our VPC. A short pause over here and if you are liking these kind of a content on AWS then I have
+recently launched my UDMI course on AWS masterclass for networking and this
+course is 10hour long course and it includes 100 plus chapter which you can see there are various section and each
+section of this particular course include multiple chapter along with the demos. The course is divided into the
+three level. One will start with the basic level. Second will be the intermediate level and third will be the
+expert level and at the end of this particular course you will see a terraform which we quite use a lot in
+the industry. So I will give you a really good walk through and demos including the terraform plus networking
+followed with a devops project where we will be using all the concepts which we have learned in this particular course
+so far and in which certification this particular course is going to help you. So it is going to help you in like a
+cloud practitioner, developer associate, devops engineer, sysop administrator, advanced networking, solution architect
+and professional solution architect certification if you are planning to do those certification for AWS. Please find
+the course link into the description section with the discount code and let's get back to the topic. All right. So
+let's start with our first basic building block for this whole setup. So that is going to be the VPC. So here you
+can see this is the VPC which we need to create onto our AWS environment. So I'm just going to switch to my AWS console.
+So this is my AWS console. Type in the search box VPC. Click on the VPC here.
+Click on create VPC. Click on VPC only because we are only interested in creating VPC. Enter the name. So I'm
+just going to put test VPC. Then we need to specify the uh IP ranges. So here I'm
+just going to choose the IP range. Uh this is a userdefined. you can change and you can put your own uh default IP
+range which you want to have it okay so that I have specified tenency I'm just going to keep it default tag I'm just
+going to keep it uh test VPC and after that you just click on create VPC and here you can see our VPC has been
+created which you can verify by clicking over here and here you can see this is the test VPC which we have just created
+moving ahead the next block which we need to create for this targeted architecture is the internet gateway so
+this is the internet gateway which we are going to associate with our VPC. So again switch back to our console and
+here onto VPC dashboard. Uh you will find an option for internet gateway. So just click on here. Here you can see
+there is no internet gateway has been created. Click on internet gateway. Then here you can specify the name. So I'm
+just going to copy from my notepad and paste it over here. And this is the IGW that's abbreviation I'm keeping it. And
+the key name I'm the tag name. I'm just going to keep it name and internet gateway test. So click on create
+internet gateway and here you can see our internet gateway has been created but remember that internet gateway is
+not associated with the VPC which you can verify from here. So this internet gateway has been created but state is
+detached. So you need to click on this internet gateway go to action go to attach VPC and here you need to select
+the test VPC which we have just created in the previous step. So attach to internet gateway and now our internet
+gateway is ready. Moving back to our diagram. The next block which we need to create over here is the subnet. So here
+we are going to create two subnet. Both are going to be a public subnet and these are the IP ranges which we are
+going to assign to those subnets. So let's switch back to our uh AWS console.
+And here in the VPC not VPC but on a VPC dashboard you will find an option for a
+subnet. So here you can see these are the subnets. Click on it. So here these are the default subnet which has already
+been created for you but we don't need to use that. we are going to create our own public subnet. So click on create
+subnet over here. Uh then you need to select the VPC. So select test VPC because we are going to work inside our
+test VPC. Okay. So now we have selected the test VPC and then we need to enter
+the name of our public subnet. So I'm just going to put the name test public subnet 1A. So I'm just going to uh
+explain to you why I'm using 1A because I'm present in the Europe Europe zone. So that's why I'm using the Europe
+central 1A. That's the availability zone. So I'm just going to select that one. After that we need to specify the
+IP range for my public subnet. So I'm just going to use the IP range over here. So I have just copied and paste.
+So here the value which I have pasted. So 12.0.1.0/24. So I will have a 256 IPs
+available uh within my subnet. So that's my first public subnet which I have created. I need to create a one more
+public subnet so that we can create two EC2 instances inside those subnet and then we can load balance uh the traffic
+onto those EC2 instances. So that's just a heads up for you. Okay. So here I'm
+just going to copy another value. Uh so I just going to paste the name and sorry this is not the correct. So I'm just
+going to copy the name from the top. go over here and here I'm just going to
+change it to 1B so that I can uh provision this subnet into another uh
+zone and here I can I'm just going to specify the zone that is Europe central 1B after that I need to specify the IP
+range so I'm just going to check what IP range I have specified so it's a 12.03.0 zero. So I'm just going to copy from my
+notepad. Go back to my AWS console, paste the value over here and the tax.
+That's fine. I'm just going to click on create subnet. And here you can see our subnet has been created. If you go back
+to dashboard and if you click on subnet, then here you can see these are the two subnets which we have just created. Now
+after creating the subnets, we need to create the route table also. so that uh this public subnet can have the access
+to the internet because internet gateway and the subnets are still not connected with each other and for that we need a
+route table. So here you will also find a option on the left hand side to create a route table. So click on it and here
+these are the default route table but we are not going to use that one. We just going to create a new one. So here I'm just going to put the name of the route
+table. So test public RT RT is the abbreviation for a route table. Then again we are working in a single VPC. So
+the VPC which we have created is the test VPC. I'm just going to select that one. The key uh I'm just going to go
+with the default value and then just click on create route table. Check the route tables over here. So here you can
+see our route table has been created. The next thing which we need to do we need to provide a internet access to
+this route table and also we need to associate this route table with our subnet. So first of all we are just
+going to associate this route table with our subnets. So I'm just going to click on subnet association. Go to edit
+subnets and here you can see our both the subnet which I have created. So select both of them and save
+association. So now this route table is being associated with these subnets but
+still uh these subnets don't have the access to our internet and for that we need to create a route. So here go on to
+routes inside the route table click on edit routes and here click on add route and here you need to enter the IP. So
+this 0.0.0.0 zero means it will have an internet access and anyone can access
+those public subnet or any resource present inside that public subnet will be accessible. So that's just a heads up
+for you. Now we here we need to select the internet gateway because internet gateway is responsible for providing the
+internet access for this uh route table. So I'm just going to select the internet gateway and here you need to you it the
+internet gateway name will pop up because this is the internet gateway which we have just created. So select this internet gateway and after that you
+can just click on save changes. All right. So now this route table has a internet gateway which is
+linked to internet and now we are having the subnets also. All the public subnets are associated with this particular
+route tables. Now after creating the route table let's take a look onto the diagram first and check on the which
+next block which we are going to create. So here these are the things which we have achieved so far. We have created
+the VPC. We have created the internet gateway. We have created the subnet and we have also created the route table.
+Now the next thing which we need to create is we need to create the EC2 instances. So we will create two EC2
+instances. One in first subnet and another one in to another public subnet. So we have already created the two
+public subnet inside our AWS. So let's switch back to our AWS console over here
+and go to D home console. Click on EC2 or either you can
+type over here. So EC2 over here and here you can see there are no instances
+running. So click on launch instances and here we are just going to put the name test EC2 uh
+instance one. Second we need to choose the uh base operating system. For that
+I'm just going to choose Ubuntu. After that uh I need to choose the architecture. So I'm just going to
+go with x86. I'm just going to choose D2.micro because this is just for demo purpose.
+key pair. I'm just going to choose I I will just create a new key pair. Uh so test ALB uh demo key
+pair. All right. Then create key pair and remember once you create this key
+pair then here it is going to download this uh key pair for you. Okay. And also it is going to associate this public
+key. So here you can see in the drop-down the public key has been associated with our EC2 instance. And
+this is the private key which we have downloaded which we are going to use later. Okay. So now we have created the
+key pair. Uh go to network setting. This is important because here we need to change few things. And the few things
+I'm talking about is we need to associate our test VPC which we have just created. So here from the drop-down
+just select the test VPC which we have created. Then from the uh drop-own menu you need to select the public subnet. So
+by default it will populate those uh subnet which we have created. So first of all for first uh instance I'm just
+going to go with the uh test public subnet 1A. So that has been selected.
+Assign public IP. So I'm just going to say enable it. Yes. Uh create security group that's uh important. Uh because we
+are just going to create uh some security group rules over here. So here you can see by default we are allowing
+the SSH. So whenever this EC2 instance starts so we will be able to SSH into
+this EC2 instance on a port 2020. But also we need to enable the port 80 so that we can access uh the Apache which
+we are going to install onto this EC2 instance. So for that click on add security rule and instead of custom TCP
+we are just going to choose the HTTP and here port 8080 source type from
+anywhere. So we will be able to access this EC2 instance from anywhere in the world. Uh so I think that's good. So
+remember we need always we need to create these at least these two security groups. one is for SSH and one is for
+HTTP port 80 so that it is accessible from outside uh AWS environment. All
+right. So that we have done it. Uh the default storage we are going to go with the 8GB. And in the advanced details
+here we need to do few more things. So if you go down then here is the user data section where you can write down
+the packages which you want to get it installed onto your EC2 machine. So if you don't know what is user data then
+please check the uh previous session where I have explained like what is user data and how you can use the user data
+to bootstrap or pre-install certain software packages. But just to give you a brief I'm just going to copy uh one of
+my script uh which is I'm just going to show you which is this. So here what we
+are going to do we are just going to update the package manager. We are just going to install the apache tool and after that we are just going to uh
+update the index.html HTML so that it can print the host name of that EC2
+instance. So that's the simple thing I just I'm just trying to achieve over here. All right. So once we are done
+with all this thing what we are going to do we are just going to click on this launch instance button. So click on
+launch instance. Okay. So here our instance has been launched. So click on this instances and here right now it is
+in a pending state. So I'll be back once this instance is up and running. So after a minute or so my instance is up
+and running and here you can see the status which is running. So click on this instance ID and here you will find
+the public IP. So first we need to verify our Apache whether it has been installed or not. So I'm just going to
+copy this address. Go to browser and hit enter. So here you can see uh these are the server detail. I'm just going to
+zoom in a bit over here so that you can see. So this is the IP which we are trying to print over here so that we can
+later on verify uh once we provision the load balancer so that which request is point going to which EC2 instance. So
+this is the internal IP address which you can see 12.0142 and now this IP range you can uh
+know that uh this is the same IP range we have specified for our public subnet. So now we are getting the IP addresses
+for our EC2 instance from that particular range. Okay. So I'm just
+going to close this window over here and I'm just going to click on EC2. So as of now I'm just going to refresh it again.
+So here you can see one instance running. So now we have provisioned one EC2 instance but we need a one more EC2
+instance into another public subnet. So for that I'm just going to click on this launch instance and here I'm just going
+to put uh test EC2 instance and I'm just going to put
+two. Select Ubuntu. Then here you just need to select the architectural type. I'm just going to go with the default
+x86 T2 micro. And here I'm just going to choose the se key pair name which I have
+just created. I think it is test ALB demo key pair. Network setting I'm just
+going to edit it. Uh select the VPC which is test VPC which we have just created. And here subnet I'm just going
+to choose uh 1B. Okay. And here auto assign enable it. Uh create security
+group. Yes, we want to create a security group. And uh for that we are just going to go with the default which is SSH22
+because we want to SSH into our EC2 instance but also we want to enable the HTTP on a port 80. So and also I just
+want to access it from anywhere. Okay. So now we have defined this uh security group rule. The next thing which we need
+to do is configure storage. I'm just going to stick with the default one but in the advanced detail I'm just going to
+go with the user uh data. So here this is the section. I'm just going to copy the script to install the
+Apache. And that's been done. And after that, uh I think it looks good. So I'm
+just going to hit on launch instance. Okay. So click on launch instance. All right. So let's go back to instances.
+And here you can see it is in pending state. So I'll be back once this second instance is up and running. All right.
+So now my second instance is up and running. So let's verify a few things over here. So I'm just going to copy the IP address which is the public IP
+address and verify my Apache 2 page. So click on it and here you can see I'm just going to zoom in a bit. So this is
+the uh IP which has been assigned for this EC2 instance and now it is 12.03
+and then 160. So it's again coming from the default IP range which we have assigned for our another public subnet
+and which you can verify from here also. So here you can see the same IP which is available over here. So now we have
+provisioned our EC2 instances and now we have installed the Apache but we have not yet configured the target group
+which we are going to do the next but before we create a target group let's take a look onto our architectural
+diagram. So here you can see we have achieved so far like VPC internet gateway subnets and also we have
+provisioned the EC2 instances. So now what we need to do we just need to create our target group. So target group
+is just a logical unit where we are going to club this EC2 instance into this single target group so that later
+on elastic uh load balancer can point to this particular target group. I know it
+sounds complicated but let's take a look onto our AWS console and then we you are going to understand what I'm trying to
+say over here. All right. So this is my EC2 dashboard. So click on this EC2 dashboard homepage and on the left
+navigation menu there is a option for a load balancing and inside the load balancing there is a option for a target
+group creation. So click on target group and here you can see this section is empty. So we need to create a target
+group and inside that target group we need to include both the EC2 instances. So first of all let's click on create
+target group. Here there are certain types of target group which you can create but for this example we are just
+going to stick with the uh EC2 instance or instances type target group. So just select this one. Go ahead and here you
+need to enter the name. So I'm just going to put the test uh EC2 ALB demo target group. So TG is for
+abbreviation IP address type. So I'm just going to stick with IP4 uh VPC because everything we are doing into the
+test VPC. So we need to select the test VPC over here. Protocol version I'm just
+going to stick with HTTP1. Uh the health check endpoint I'm just going to go with the default root because uh as you can
+see uh we are just able to access our homepage uh and we don't have any path uh which is like this. So we don't need
+to specify anything. So I'm just going to go with the root path. Okay. Go ahead. Advanced health check setting.
+I'm just going to stick with the default. We don't need to change it. Tax it's optional. So I'm just going not
+going to assign any tag name. Click on next over here. And as soon as you click next then you can see all the EC2
+instances running uh which are ready to be included. So here you can see uh here you can select the EC2 instances which
+you want to include. So I'm just going to select these and both of the EC2 instances are running and now I have
+selected both of it. Now after selecting you need to click on include as a pending below. So here uh it will be
+included and it will be accessible on a port 18. So I'm just going to click include as pending below. And here you
+can see uh these targets are now included. And after that you just need to click on the create target group. So
+click on this create target group over here. And here you can see our target group has been created. So click on this
+create target group. And uh yeah so as of now the health status is unused as
+you can see over here. But uh you just need to wait for a couple of minute and the health status should change to
+healthy. One correction I'd like to make over here. So here you can see the health status is unused because we have
+not created the application load balancer. So once we create the application load balancer then this status will change. So now what we need
+to do we just need to create our application load balancer. But before we create our application load balancer
+let's take a look onto our architectural diagram. So here you can see uh we have come far away. So we have created VPC
+internet gateway public subnet private subnet. We have provisioned the EC2 instance and also we have created a
+targeted group. Now the next component which we need to create is we need to create a application load balancer. So
+let's go back to our application console uh AWS console and here click on EC2 dashboard and in the left navigation you
+will find a option for a load balancing and here you will find a option for a load balancer. So click on this load
+balancer and here you can see there are no load balancer has been created. So click on this load balancer button and
+here you will find the three types of load balancer which is application load balancer, network load balancer and
+gateway load balancer. But here we are only interested into application load balancer. Uh so we are just going to
+choose this one. Okay. So click on create over here. So now what we need to do first of all we need to assign the
+name for a load balancer. So I'm just going to assign the test uh LB for
+EC2 demo. Okay. So that's the name. Uh the scheme is internetf facing. So yes
+we want to have it as a internetf facing load balancer into the network mapping. And as I have told many times, we are
+just working under a VPC which we have created. And the name of the VPC is test VPC. So in the drop-down you will find
+the test VPC. Just select that one. And once you create select the test VPC then
+you will automatically get the subnets which we have created. So here we have created the one public subnet which is
+in EU central 1A and another one. We need to select both of it otherwise our application load balancer will not work.
+Okay. The next thing which we need to create over here is the security group. So there is a one default security group
+which has been created. But we need to create a one more security group for port 80 and for uh accepting the HTTP
+request. So for that what I'm just going to do I'm just going to click on this create security group over here and I'm
+just going to put security group uh for LB ALB
+demo and uh allow access from internet that's the description I'm just going to
+put here we need to choose the VPC info so here if you click on this one then
+I'm just going to choose test VPC inbound rule add click here and type
+HTTP and here I'm just going to choose the port 80 and source I'm just going to put 0000 so that anyone from anywhere
+can access this load balancer okay so that this security group has been created I'm just going to copy this
+security group name because that will be needed to add this security group and I'm just going to click on create
+security group uh cannot begin with SG okay so I need to change it okay so
+let's put security group for ALB
+demo and I'm just going to click on create security group. All right, so this security group has been created.
+I'm just going to copy this name from here and I'm just going to close this window. I'm just going to refresh this
+page over here and here we should find that security group. So that's the security group which we have just
+created. Select that one. So now we have selected the default as well as the security group for allowing the HTTP
+request on a port 80. All right. Now here uh in the listeners and routing. So
+here we need to select the target group. So let's take a look onto the diagram once again so that it's easy to
+understand. So here in the green box which is you can see this is our target group. So this target group we need to
+select for this load balancer and this target group which we have already created. So if you go over here in the
+target group. So here you can see. So this is the target group which we have already created. And inside the target
+group we have both the instances uh EC2 instances running. So I'm just going to copy this name from
+here and into this listener and routing. I'm just going to select here. You can see it is by default coming because
+that's the only target group I have inside my uh AWS account. So I'm just going to select that one. And the
+listener tag is optional. So I'm just going to skip that one. uh add-on services are optional. So I'm just going
+to skip that one. So here just take a look onto this summary over here. So the basic configuration for this auto uh
+application load balancer is this is an internet facing. This is an IP4 security group. Uh we are allowing the HTTP. This
+is the security group which we have created. This is the default one. So I'm just not going to change that one. So this is the VPC and this VPC is test
+VPC. And these are the subnets uh the two subnet which I have created which are public subnet and this is the target
+group. So this is the target group inside uh where we are having two EC2 instance running. All right. So now we
+can just click on create load balancer and as you can see successfully created the load balancer. So just go on to load
+balancer tab once again and here just wait for a couple of minute because it's still into the provisioning state. So it
+might take a couple of minute to uh provision this whole load balancer. So I'll be back once this auto load balance
+application load balancer is up and running. All right. So after a couple of minute my uh application load balancer
+is in a active state. So click on this application load balancer over here. And here you will find the details and the
+detail which we are looking for is the DNS name so that we can access that application load balancer. So here you
+can see the DNS name which is present. So you can just copy this DNS name from here. Uh go to the new tab and hit
+enter. And here you can see uh I'm just going to zoom in a bit so that you can see. So now the request has been routed
+to the uh EC2 instance too. I'm just going to refresh it once again. So here
+you can see the uh request is landing on another EC2 instance because the IP address has been changing. So again
+refresh it. So here you can see the IP address has been changed and we can verify the EC2 instances here also just
+to reconfirm what's the IP address. So EC2 instances. So I'm just going to open
+this one and this one. So the instance IP address I'm just going to zoom in a bit if it is too small. So
+12.0360 and another one is uh
+12.01.142. So these are the two IP address. And if I refresh this, so the
+request is going to the 1/142 and then another one another request is going to the
+3/160. So that's how we are just going to set up the application load balancer. And that's application load balancer is
+responsible for sharing the request between the EC2 instances which you have set up inside your VPC. So let's take a
+look onto the architectural diagram once again. So this was the target architectural diagram and the last pieces were just nothing. It was just a
+few arrows. So here this was the user and it is accessing the application load balancer and the requests are being
+routed to both the EC2 instances. So here you can see uh and the user is us
+and this is the DNS name uh through which we are accessing the application load balancer and then the request is
+getting routed to both the EC2 instances. Here is our target layout
+Network Load Balancer
+which we are going to implement as a end result of this session. So here we will be setting up an EC2 instance within our
+VPC which will have a subnet internet gateway route table and EC2 instance running within that particular subnet.
+We'll also set up a target group where we will be adding our EC2 instance to that target group and after adding that
+we are going to set up our application load balancer as well as our network load balancer and also I'm just going to
+show you like what are the differences between the application load balancer and when we are trying to access our network load balancer. So for this
+session we need to understand what's the basic difference lies between the NLP which we call it as a network load
+balancer as well as application load balancer. So this is our target layout which we are going to implement
+throughout this session and there are two component which are important for this target layout. One is application
+load balancer and one is NLB which is our network load balancer and which is our key topic for this particular
+session. But why I have kept ALB and NLB into this implementation is because you
+need to understand the basic difference between ALB and NLB and when you need to use it. But don't worry about it. We are
+just going to break down this whole layout into bits and pieces and we are just going to implement each component. So on a crux level I will say that we
+are going to set up an VPC. We are going to set up a subnet. Inside the subnet we will have internet gateway route table
+and EC2 instance and for that EC2 instance we will be creating a target group so that load balancers can point
+to this target group. So once after creating a target group then we are going to create a application load
+balancer and we are also going to create a network load balancer. So any of the load balancer will have a access to that
+target group so that it can reach to the EC2 instance and at the end user like us
+we will be using the URLs uh for application load balancer as well as we'll be using a URL to access our
+network load balancer. So let's jump into this session and start uh setting up our whole networking first. Let's
+start with our first component and that is our VPC within our AWS account. So this is the first VPC which we are going
+to create and with the IP range 11.0 0.0.0. So let's get over to our AWS
+console and set start setting up our VPC. So here a short pause over here and if you are liking these kind of a
+content on AWS then I have recently launched my UDMI course on AWS masterclass for networking and this
+course is 10hour long course and it includes 100 plus chapter which you can see there are various section and each
+section of this particular course include multiple chapter along with the demos. The course is divided into the
+three level. One will start with the basic level. Second will be the intermediate level and third will be the
+expert level and at the end of this particular course you will see a terraform which we quite use a lot in
+the industry. So I will give you a really good walk through and demos including the terraform plus networking
+followed with a DevOps project where we will be using all the concepts which we have learned in this particular course
+so far and in which certification this particular course is going to help you. So it is going to help you in like a
+cloud practitioner, developer associate, devops engineer, sysop administrator,
+advanced networking, solution architect and professional solution architect certification. If you are planning to do
+those certification for AWS, please find the course link into the description section with the discount code. And
+let's get back to the topic. Here you can see this is my AWS console and go to your homepage and type VPC over here.
+Click on VPC. And here there are couple of VPC which I have already created. But for this session, we are just going to
+create a fresh VPC. So click on create VPC over here. And here we are going to choose the option VPC only. And here we
+are going to put a name for it. So I'm just going to put a demo
+NLB VPC. Then we need to specify the IP range. So I'm just going to put
+11.0.0.0/16. And I'm just going to stick uh with the default setting over here. I'm not going to use IPv6. And the key
+and value I'm just going to keep it default. And after that click on create VPC. And if you go to the VPC dashboard
+once again and here you can see there are three VPCs. go to the VPCs and you will be able to verify your VPC which is
+this one demo NLBVPC. Click on this VPC and here are the details related to your
+uh VPC. After creating the VPC, the next resources which we need to create is the subnet. And the subnet we are talking
+about is the public subnet and the private subnet. So within the VPC, we are going to create two public subnet
+and two private subnet. And the range for the private and public subnet which you can see over here is public will
+have 11.0.1.0 0 and the another public subnet uh within that VPC will have 11.2
+0.2.0 and similarly the private subnet will have two we will create two private subnet and both the private subnet will
+have a IP ranges ending with 3.0 and 4.0. So 1.0 2.0 for public and 3.0 and
+4.0 for our private subnet. Let's go to our AWS console once again for creating the subnet and again click on VPC
+dashboard over here and click on subnets. And here are some of the default subnet
+subnets which I have already created but I'm not going to use those. I'm just going to click on create new. First of
+all, we need to select the VPC. So if you take a look onto the diagram over here then these subnets lies within this
+particular VPC. So we need to choose the VPC which we have just created. So go back to your console and select the VPC.
+So our VPC is demo NLB VPC. Select that one. And here I'm just going to put the
+uh subnet name. So I'm just going to put a demo uh NLB
+public subnet 1 a 1 a I am a uh suffixing it because we need to choose
+the region. So differentiate that that's why I'm using the 1 a. So here you will see the availability zone and here I'm
+just going to deploy it inside my Europe central 1 A. That's why I have suffixed it with 1 A. And IP range as I told you
+we are just going to stick with 1.0 and 2.0. 0 for public IP. So I'm just going to put
+0.1.0/24. 24 is just defining the IP ranges. So if I choose 16, then my IP
+ranges will increase. So here you can see 65,000. But since it's a demo, so I'm just going to choose 24 so that I
+have a 256 IPs which are sufficient for demo. Okay. So this is our first public
+subnet and click on add one more new subnet. I'm just going to copy this name from here. Paste it over here. And I'm
+just going to choose 1B availability zone. I'm just going to choose different availability zone so that I have maximum
+availability. And IP range I can copy it from here and uh paste it over here
+also. But here I will choose 2.0. Okay. And now we have created our public
+subnet. So let's create private subnet here as well. So click on add new subnet
+and paste the name uh sorry I just need to copy the name once again from the top. So I'll copy this name and paste it
+over here. And instead of public, I'm just going to make it private and put it 1 A. Availability zone, I'm just going
+to choose 1 A. I'm just going to copy the IP range from the top. And for private, we have chosen to go with
+3.0. And that's it. I'm just going to copy this name once again because we are just going to create a one more private
+subnet. So go ahead, click on add new subnet. Paste that one. Select it to 1B.
+Change the availability zone to 1B and IP range. I'm just going to copy
+the IP range from here. Put it over here and make it 4.0. And now we are done with it. So
+here you can see the subnet four of four. So we have created four subnet two public subnet and two private subnet.
+And if you take a look onto the diagram, so these are the IP ranges. Since I have a very limited space on my slide so
+that's why I cannot create a four different boxes because there are more component I'm just going to fit to it. So I have I have just mentioned over
+here the IP ranges so that you know that we are working with the two public and two private subnet. Okay. So once we are
+done with it just verify the details once again uh by going up and it looks correct to me and then what we are going
+to do we are just going to click on create subnet and here you can see our subnets
+has been created and if you want to look a very uh like a filtered view so from the drop-down you can select the VPC
+which we have created so just select the demo NLB VPC so that uh it will not be
+so many records popping up over here so you will see only the resources which belongs to your VPC So that's just a
+quick tip for you. Let's move ahead and the next resource which we need to add to our networking setup is our internet
+gateway. And internet gateway is just a route to getting an internet access. So
+we need to attach to the public subnet because any resource present within the public subnet will have a access to
+internet as well as any uh resource within the public subnet should be accessible from uh outside of our VPC so
+that I can access from my local laptop. Although we need to set up our route table and other uh restrictions over
+there but internet gateway in a crux we need to set it up with our public subnet so that it is uh our resources can
+access the internet. Okay. So let's go back to our AWS console and here you can see these are the subnets which we have
+created. Let's go back to our VPC dashboard once again and from the left navigation we can select internet
+gateway. So click on this one and uh click on create internet gateway. And
+here we need to put the name. So I'm just going to put a demo uh NLP IGW for
+internet gateway abbreviation. And after that just simply click on create internet
+gateway. And if you go back to internet gateway dashboard and uh just refresh
+this thing. uh sorry we need to remove the filter because internet gateway is not attached
+to VPC yet. So here you can see this is the demo NLB internet gateway which we have created but but this internet
+gateway is still an open internet gateway we need to attach it to our VPC.
+So click on this internet gateway over here and here you can see it the state is detached. So if you take a look onto
+the diagram so this internet gateway is present within the VPC. So we need to make this attachment happen. So I'll go
+over here, click on actions, click on attach to VPC, and then select the VPC, which is our demo NLB VPC. Select that
+one. Click on attach internet gateway. And here you can see our internet gateway has been attached. All right. So
+now after attaching the internet gateway to our VPC, then the next resource which we need to create is the route table.
+And the route table we are going to create is for our uh public uh subnet as well as for our private subnet. So these
+are the two route tables which we need to create. So let's get back to our AWS console over here and uh go back to our
+VPC dashboard once again and from the left navigation menu you can also find the option for a routes table and from
+the uh dashboard you can also find the route table option. So select that one
+and uh here if you remove the filter then you can see the other route table but we are not interested in those we
+will create our own route tables over here. So click on create route table. So first thing we are going to create is
+our public route table. So I'm just going to put demo NLB
+public RT. RT I'm going to use for route table abbreviation. Then select the VPC.
+Since we are working in the VPC. So we need to select the VPC which is our demo NLBVPC. So from the drop-down go and
+select demo NLBV VPC tag. I'm just going to keep everything default and then click on create route
+table. And here you can see our route table has been created. I'm just going to copy this name to create our private
+route table as well. So click on route tables. Go to create route table. Then
+put it over here. Change it to private. And the VPC I'm just going to select demo NLBV VPC. And then click on create
+route table. And here you can see our both the route tables has been created for NLB demo which is our public route
+table and our private route table. Now let's take a look onto the diagram once again. So we only created the route
+table but we have not attached this route table to our public subnet. So similarly this private route table is
+also not attached with our uh private subnet. So we need to go back and attach or make those kind of association. So
+let's go back to our uh route table dashboard. So open the public route table over here and click on subnet
+association. So here click on it and here you can see this subnet association is completely empty over here. So click
+on edit subnet association and since we are working into our public subnet so I'm just going to attach to our public
+and this one. So we are going to attach to our uh we are going to attach our public subnet to this particular public
+route table. Click on save association and we are uh we have updated our route table with our public
+subnet association. So again go back to our route tables and select the private route table. Go back to subnet
+association. Click on edit subnet association and then select private uh
+subnets over here and then click on save association. Okay. So now our route
+tables has been attached. So which we can verify once again. So here you can see public route table. This is public
+route table and these are our public subnets attached to it associated with it. Similarly if we go back and go back
+onto our private then here we can see our subnets for our private route table is our private subnets. Okay. There is
+one more thing we need to set for our public route table is our route to the internet gateway. So if you take a look
+onto this diagram. So here you can see this is internet gateway which we have created but we have not created any
+route inside this route table for this internet gateway. So that is important because we are working into public
+subnet and we need to attach this internet gateway to this particular route table. So go back to our route
+table. Click on this route table and we are going to choose public route table. So click on this one and here you can
+see the routes. This is a default route uh for our uh subnet. So I'm just going to click on edit routes. Click on add.
+And here I'm just going to choose the IP 0.0.0 which means this is our uh we are allowing all the IP addresses for this
+particular route and click on target route. So here I'm just going to choose internet gateway. And if you click on
+this one then you will find a demo NLB internet gateway which we have just created. So select that one and then
+click on save changes. And here you can see our public route table now have our internet
+gateway as well as our subnet association which is our public subnet and which you can compare from our
+diagram over here. So here you can see this public subnet is now ready with our internet gateway as well as our route
+table. Let's move ahead to the second chapter and in this chapter we are going to set up our EC2 instance. So here you
+can see this is the same setup we are just carrying forward and now we are going to set up our EC2 instance into
+our public subnet. So again go back to your AWS dashboard go to the homepage
+and in the search box you can type EC2 click on this EC2 over here and here you can see no instances
+running. So I'm just going to click on launch instances and uh here we are going to put the name of my instance.
+So, I'm just going to put demo NLB EC uh 2 and I'm just going to put
+one uh because we are going to spin up multiple EC2 instances over here. I'm just going to go with my Ubuntu as my
+default uh operating system for my uh Linux machine. And I'm just going to stick with
+T2.micro and the key pair. I have already created this key pair AWS EC2
+terapform.pub. But here for the demo, I'm just going to create a new key pair so that we can SSH into that EC2
+instance. So click on create new key pair. And here you can type demo uh
+NLB key. Click on create key pair. And here you can see the private key has
+been downloaded for you. And uh uh yeah and the public key for this particular
+setup has been attached to your uh EC2 instance from the dropdown which you can see. Okay, we are just going to use that
+private key later but for the time being let's continue ahead with our networking setup. So here you can see this is the
+networking setup. Click on edit over here and here we need to assign the correct networking because we have
+already done the setup for networking and now we need to provision our EC2 instance into that networking setup. So
+if you take a look onto the diagrams then EC2 instance is present onto this public subnet under this VPC. So let's
+go ahead and uh from the drop-down choose the correct VPC. So the VPC which we are using is demo NLB VPC. So select
+that one and the subnet we are just going to choose let's go ahead and choose our public subnet 1A. So this is
+the one demo NLB public subnet 1A. So I have chosen that one. Uh public IP. Yes,
+I just want to enable it. And after that security group uh we just want 22 uh
+which is we are going to use for SSH. Then add a one more security group. And
+here I'm just going to choose uh HTTP port and I'm just going to use 80 and
+source type from anywhere because this is just a demo that's why I'm keeping it from anywhere so that anyone can access
+this port 80 and because why I'm enabling port 80 because we're just going to install the Apache and some
+pages basic HTML pages onto that Apache machine so that we can access on a port
+80. So that's the reason I'm setting up this security group. Okay. And after
+that we just need to go to the advanced detail and here we need to set up some installation script into the user data
+section. Here you can see this is the user data. Here we will write some script which will be responsible for
+installing the Apache as well as some custom pages uh HTML pages onto that particular Apache instance. Here is my
+script which will install the Apache. So I'll go to this script one by one. So this is going to update the package
+manager for my Ubuntu. Then it is going to install the Apache. Then it is going to set up this basic index html page and
+after that it is just going to restart the Apache 2. So this everything will happen when we are setting up or when we
+are starting up our EC2 instance. So it is all the startup time setup which is
+happening. And once the system is up and running then we will be able to access our Apache homepage which is running on
+a port 80. And if you don't know much about this user data section then I have prepared a separate session on this same
+playlist of AWS where you will find the more details like how to work with your user data setup. So just go and check
+that session. Okay. So I have created this uh script. Just click on launch instances over here. And here you can
+see our instance is getting launched. So click on instances. And here you can see this is into pending state. Uh these are
+some previous instances which I have been testing around but those have been terminated. But we need to wait for this
+status to go running and then we will uh verify our Apache homepage. And here you
+can see my instance is up and running. So click on this instance ID over here. Copy this public address. Go to the new
+tab and paste it over here. And here you can see this is our homepage of my uh Apache 2 where it is setting up the host
+name and IP address for that particular instance. So that uh concludes that my
+Apache has been installed successfully onto my EC2 machine. After installing the Apache, we need to set up couple of
+more pages. So here you can see this is the instance IP uh which we verified it which you can see in the back end also
+which is up and running. But we also need to set up a custom pages. So one I'm going to set it fu and one more I'm
+just going to set it bar. So that we need to set it up by going into our EC2 instances and setting up these custom
+pages for that particular Apache instance. Uh we need these custom paths
+because we will be setting up our application load balancer and also we will be setting up our network load
+balancer. So I will be able to show you the difference between how application load balancer behaves when we have a
+custom path and how we can set those custom rules in application load balancer. But at the same time that is
+not possible uh with the network load balancer. So that's that's one more difference uh which we need to check
+when we are setting up our application load balancer as well as network load balancer. Now let's go back to our EC2
+instance and here click on connect over here and here you will find the instructions for connecting to your EC2
+instance. So first of all you need to have the key which we have already downloaded which you can see demo NLB
+key.pam which I have already downloaded. we need to change the permission to the 400 so that it's only read only. So I'm
+just going to copy this command and I'm just going to head over to my terminal and let me open my terminal over here.
+So here you can see this is my terminal. I'm just going to yeah here it looks good. Now I'm just going to clear this
+one and first of all I'm just going to verify whether I have that key here or not. So here I'm just going to type demo
+and uh I need to put grap and here you can see I have that
+particular key available into this particular directory. Okay so I'm just going to copy this command from here and
+I'm just going to change the permission to 400 that I have changed it
+and then I'm just going to click on SSH command over here so that I can SSH into that in instance. So, I'm just going to
+go back and I'm just going to paste it over here and then type yes to connect
+it. And here you can see I'm inside my EC2 instance. I'm just going to clear this screen over here. And uh first of
+all, let's verify the uh status of our Apache. Uh so I'm just going to run system uh ctl status Apache 2. And here
+you can see it is up and running. Okay, let's create the directories first. So I'm just going to copy the command from
+my notepad and paste it over here. So first of all, we need to create the full directory inside a v www html. And you
+can find all this command into the description section. So don't need to worry about it. So I'm just going to hit enter. And the next directory which I'm
+just going to create is for bar. So let's hit enter. And then we can verify that those directory has been created.
+So run the command ls l and then type var w and html. And here you can see the
+directory has been created fu andb bar and we have the default index html page which we have already verified from
+here. The next thing which we need to do is we need to create a index html file. We have created the directory. Let's
+create the index html file. So I'm just going to clear this one and I'm just going to copy the command to create a
+index html. So this is the first command which I'm just going to write to index.html inside the full directory.
+Hit enter. And then I'm just going to copy the second command to write inside my index.htm. html of bar. So here you
+can see this is not write but create index html. So here you can see we have created the both the file and we can
+verify by running the ls command also and run going into the food directory and here you can see the index html
+there and similarly if we go to the bar then we should also see the index html.
+Okay, I'm just going to clear the screen. And the next thing which we need to do, we just need to write some
+content inside our HTML pages inside FU as well as inside our bar. Okay, so
+first of all, let's open that file into edit mode. Here I you can see I have put inside the edit mode. Press I to go into
+edit mode and then I'm just going to copy the content and I'm just going to paste it over here. So here you can see
+this is the message from fu inside the fu.index html and then after save and
+quit. Similarly, I'm just going to copy the another command for bar and paste it over here. Hit enter and go to insert
+mode and then copy the command from here. Uh the text sorry and here you can see this is bar save and quit. And now
+our index html has been placed inside my apache to fu and bar. Now the thing is we need to restart our system. So I'm
+just going to do uh pseudo system ctl uh restart Apache
+2 and it will restart our Apache 2. Let's verify those pages. So go back to
+the homepage once again. So this is the default homepage which you can see which tells us the IP address. But now we have
+set up FU and bar. So just click on uh FU over here. And here you can see this is the FU HTML page which is showing up.
+And similarly I'm just going to click on bar. And here you can see the bar HTML page
+is also set up. So now we have set up our EC2 instance which is up and running. And also you can see we only
+set up one EC2 instance which is into running state. So I'm just going to change it to running. So here you can see this is a one instance. So I'm just
+going to set up a one more instance exactly following the same step which I have just shown you. And I'm just going
+to set up a one more instance over here so that our load balancer can redirect those requests to the respective
+instances. And uh yeah, let's I'll try to come back once I have set up this whole EC2 instance. And my second EC2
+instance is up and running and then we'll start to look into the target group setup and the load balancers. All
+right. So my both the instances are up and running and here you can see the second instance over here. I'm just
+going to copy the public IP address. go to the uh next URL tab and here you can
+see this is the homepage and if I go to fu then you will see the uh fu message from my uh apache 2 which is running
+into my instance too also I have added the name so that we can identify that request is landing on a which server so
+that's the additional modification which I have did and similarly I have modified uh this uh instance HTML page also and I
+have hardcoded the name so if I go here and if I go and click on uh let's say fu
+then it will show you the demo from uh EC21 so so that we can identify where
+the requests are going when we will start accessing it from our load balancer or network load balancer as
+well as uh the application load balancer all right so instances are up and
+running the next thing which we need to do is we need to set up our target groups so let's take a look onto the
+diagram once again so here you can see this is the setup we have done so far and now we will just work onto this EC2
+instance subnet. So I will just uh remove some of the elements from this diagram. And here I'll just shift this
+particular EC2 instance block to the right side so that we get a more space over here. And the next thing which we
+need to set up is our target group. So target group will set. So this is our EC2 instance and everything is running.
+So now we need to create a target group over here. And this target group is just a logical group where we will be mapping
+our EC2 instances. So this target group will include the instances which is like
+a EC2 instance one and EC2 instance 2 which we have created. So let's go ahead and create this target group and map
+those EC2 instances inside that target group. So here is my AWS dashboard and
+click on this EC2 because that's where we'll find option to create a target group. So from the left navigation menu
+just go to the load balancing section and you'll find option for a target group. Then click on here and here we
+need to click on create target group. So here and here we need to choose the instances because we have set up the EC2
+instances. So I'm just going to choose with the target type as a instances and the name of the target group. So I'm
+just going to choose uh NLB demo target group. TG I'm using for
+abbreviation. The port which is important over here since we are working with the network load balancer. So we
+cannot use the HTTP over here. So instead we need to use uh TCP which you
+can see over here used with a network load balancer. If you choose HTTP or HTTPS then you will not be able to set
+this target group with the network load balancer. So that's the key thing which you need to keep in mind. So click on
+TCP over here. Uh IP addresses I'm just going to stick with IPv4. Uh VPC we need
+to change from here to demo NLP VPC. Health check I'm just going to use HTTP
+attribute. I'm just going to keep everything default over here. Then click on next. And here you can see these are
+the EC2 instances which we need to include within this particular target group. So select both the instances
+include and after that click on create target group over here. So here you can
+see our target group has been created. So if you go and take a look onto the diagram. So if I go back. So yeah. So
+here you can see our target group is now including our EC2 instances. Let's move
+ahead and the next step we will be creating our network load balancer. So here if you go and take a look onto this
+diagram then here uh we have achieved this far like target group and this networking setup along with our EC2
+instances. Now we need to set up our network load balancer. But here in the diagram you will see I have created ALB
+which is application load balancer and network load balancer. We we are going to see the differences between both the two. But first let's set up the network
+load balancer. So let's ignore this arrow as of now and just focus on this network load balancer here. So this
+network load balancer should point to this target group which we have just created. So now the task is we need to
+set up our or create our network load balancer. So let's go back to our AWS dashboard over here and uh go to EC2
+dashboard. From the left navigation menu, click on the uh load balancer over
+here. Click on create load balancer and here you will find option for application load balancer and network
+load balancer and I have already covered the application load balancer in previous session. So just go and check
+those session if you are interested in application load balancer but let's just go and create our network load balancer
+first. So click on create over here and uh in the load balancer name just type
+the name whatever you feel comfortable. So I'm just going to put demo uh net uh
+work load balancer. Okay. Scheme is internetf
+facing IP address 5 is IP4 and the VPC. So I'm just going to choose demo NLB VPC
+and then I just need to choose the availability zone. So I'm just going to choose 1 A. And here I'm just going to choose the public subnet and also the
+1B. And here I'm also going to choose the public subnet. Okay. So these are the minimum requirement which you need
+to fulfill and then security group. So I'm just going to stick with default but later if we need it we are just going to
+modify the security groups for this particular uh load balancer. All right.
+So here this is important the listeners and routing. So now we have created our target group and now we need to map. So
+if you take a look onto the diagram so I'm talking about this arrow uh sorry not this one but if I I'm just talking
+about this NLB and this EC2 instance. So this NLB is pointing to this target
+group. So if you go and select from the drop-down then you will find the NLP uh
+demo target group which we have just created. So select this one. And if you go down then uh AWS
+global accelerator. We are just not going to include that one because we are just doing it for demo. And here you can
+see the details like basic configuration, security group, network mapping, VPC, subnets and this our
+target group and listeners. So everything is ready and then just go ahead and create a load balancer and
+here uh we have just created our network load balancer and click on load balancer
+over here and close this one and it is into provisioning state. So it will take couple of minutes to provision this
+particular load balancer. I would like to take a pause over here. So if you are liking this kind of a session and if you
+want more of this kind of a session then I would highly encourage to subscribe to this channel because I see into my
+YouTube analytics that you guys are watching this video but you don't consider subscribing it. So it will be a
+really boost for me if you consider subscribing to this channel because that really helped me to and keep me
+motivated to prepare this kind of a session. And also if you are interested into more premium content and you want
+to be a part of my community then please consider joining my YouTube community where I will be with you on a discord
+group and where you can just chat with me and send your messages and also there are some private sessions which are
+there for my community members uh which are not available here onto my YouTube channel. So consider subscribing to
+those also. Uh let's continue with our session. All right. So now my network load balancer is up and running. Here
+you can see which is in to active state now. So click on this network load balancer over here and here copy this
+DNS name. Go to new tab and paste it over here. And as you can see it is not
+accessible because I am doubting that there is a security group for port 80 which we need to enable. So again go
+back to network load balancer go to the security setting and check the security group which is this one. Click on the
+security group and uh go to edit inbound rule. And here you can see there is no incoming rule allowed for port 80. So
+click on add rule. Go to HTTP over here and set the port 80 and select 000 so
+that anyone can access this particular uh uh uh URL of our network load
+balancer. Okay. Then click on save. And now our rule has been added.
+So if I go to the tab and here you can see it is accessible. Now if I zoom it over here. So it is now pointing me to
+my instance homepage. Okay. So if I go and put a f over here then it should
+point me here. You can see this is our fu from demo EC2. And if I go with the bar then it should also show me the EC2
+instance. Although it is redirecting me only to the EC2 instance. But uh in a nutshell my network load balancer is up
+and running. And now we are able to navigate or we are able to access our EC2 instances. All right. So now till
+now we have set up our network load balancer and we are able to access our EC2 instances and fu and bar URL. But
+the key difference which I have been telling since from the beginning of this particular session is like we cannot set
+up some specific uh URL based rule with our network load balancer. So what does
+it mean? So for that we need to set up our application load balancer. So now we are going to set up our application load
+balancer and then you will see the difference between the network load balancer and application load balancer.
+Okay. So the next part chapter which we are going to cover is our setting up our application load balancer. But before we
+jump to our AWS console, let's take a look onto the concepts and the differences. Okay. So till now we have
+covered this URL where we are able to access our NLB URL which is our network load balancer URL. So if I sorry if I go
+into this tab. So this is our URL which is for network load balancer. And if I uh change this URL then it is
+redirecting me to the respective page. But if you take a look onto this network
+load balancer once again then uh I'll close this one. So click on this network load balancer and then go to our
+listeners. This is the section. Click on add listeners. So here you will not find
+any rules which you can define for your URL pattern. So what does it mean by the
+URL pattern? So for that let's take a look onto the diagram. So here in the application load balancer there are some
+URL patterns like if URL ends with fu and URL ends with bar then it should put
+some rules over here and then it should redirect to the respective target group. So so that it's properly working for URL
+patterns. But in the network load balancer it is not possible. it will only give you one URL and that URL will
+redirect to the EC2 instances. So although we have set up the FU and bar HTML pages but I need more granularity
+and I can set up this rule from the URL itself into load balancer. So the it can
+direct that request to the target group. So that's the difference or the
+feasibility we have in our application load balancer where we can put some rule patterns on the URL uh URL parameters
+which are coming in our request. So here if it comes into as a four then we'll
+forward that request to the four target group. If it is coming with the bar then we'll target that request to our bar
+target group. So that's only possible with our application load balancer and it is not possible with our network load
+balancer. So now let's try to set up our application load balancer. Okay. So I'll go back to my AWS dashboard once again.
+So here go to the homepage and before that we need to modify a few things onto
+our EC2 instances which I'm just going to show to you. So I'll open a notepad over here. So uh I'll just let give me a
+second and I think this is good. So here this is my notepad over here. So right
+now we have EC2 one instance and
+EC2 two instance and both the instances have uh fu as well as uh bar folder with
+their uh respective index.html HTML page and here also the same pattern is there
+because we are having fu and bar HTML page. Okay. But now what we need to do
+is to define the URL pattern filter. I'll do I'll just go to EC2 and I will
+make it only fu and here I will only create a fu folder and inside that folder I'm just
+going to create a index html. So this EC2 instance will be our FU instance and
+same I'll just do with the EC22 where I'll just create it as a bar instance. So here I'm just going to do EC2 I'll
+just put bar and here I'm just going to create a bar folder and here I'm just going to put a index html. So that's the
+uh difference I'm just going to create between these two EC2 instances. And then we are going to create a target
+group uh for this instance. This is a one target group for this instance. Uh
+which is like a target uh let's say uh fu. So this is going to be a target
+group for fu instances. And this is going to be a one more target group for bar instances. So I'll just put target
+and then uh I'll put a group and then it should be bar. So now we will create two
+target group and then finally we are just going to uh create a application load balancer and application load
+balancer we are just going to define rules and in that rules we are just going to define if it's coming with the
+full URL then just use uh the full target group and if it is coming with I'm just
+going to copy the same thing and if it is coming with a rule like a bar then just point to the bar target group okay
+And this will ultimately lead you uh to the EC2 one over here and it will lead
+you to the EC2 over here. So this is the next thing which we are going to implement. But this whole thing is not
+possible with our network load balancer. So that's the key difference which you need to keep in mind. Okay. But there
+are other differences also. But uh this is just a one prominent one which is easy to understand uh the differences
+between these two load balancer. Okay. So let's go back to our dashboard and start modifying those index html pages.
+All right. So this is my uh uh homepage of my AWS. So I'll go to EC2 over here
+and I'll go to instances. I'll just go I'll first rename this one. So I'll just put it like a
+foo. And uh sorry I didn't put fu over here. And here I'm just going to put
+bar. Okay. So I just renamed it. So let's go to the FU over here and copy
+this public IP address. I'm just going to open my terminal over here. I'll clear it. I'll exert it first of all.
+Clear it and then just uh use the IP address to SSH
+into. And now my I'm into my FU instance. I'll just clear it. And then I
+need to go to the directory uh where wwtml and then enter ls. And let's check
+again. So I am into let's me check verify once again.
+So I'm into the full instance right now. 37311105. So I am into full instance
+just to reconfirm and okay. So what we need to do we just need to remove the bar
+instance. So I'm just going to run the command rm rf and I'm just going to
+remove bar. Okay. So I have removed this one. Then I need to restart my Apache
+system ctl and status. Sorry,
+restart Apache 2. And now I have restarted my system. So let's verify
+from my public IP that I'm not able to access the bar page. So just hit enter. So yeah, this is accessible. I'm just
+going to refresh it and then I'm just going to check with FU. Yeah, it is accessible. Demo 2 EC2. Let's check with
+bar. And now it should not be accessible. So it is not found. Okay. So now we have fixed our EC2 instance which
+is our only full instance now. Okay. And I'll exit it from
+here. Then again go back to the another instance which is our bar instance.
+Click on it. Uh copy the public IP address. Go to terminal. Clear the
+screen. And this is the SSH command. So I'm just going to change it to the IP
+address. Clear it. And uh let's go to the directory. So change it to the where
+ww html. And here I'm just going to delete the fu folder. So I'm just going to use
+p sudo rmrf. And then here I'm just going to delete fu. Okay. And after that
+I just need to restart. So I'm just going to run pseudo system ctl uh
+restart apache 2. Okay. So now I have restarted it. Let's verify it. Go to the
+public IP and uh go over here. Close this one. Open it again. And here you
+can see I am on to the homepage. Let's access the bar first of all. And here it
+is accessible on the EC2. But the FU should not be accessible over
+here. And here you can see the FU is gone. So now we have set up our EC2 instances. One is FU instance, one is
+bar instance. And now we need to create a target group for these two instances. Let's go back to our AWS dashboard once
+again. On the left navigation menu in the load balancer, create a target groups over here. Uh this is a previous
+target group. I'm just going to create a new target group for EC2 instances. The name I'm just going to keep it like four
+target group ALB for application load balancer. Port HTTP that's okay. And the
+VPC I'm just going to choose demo NLB health check. I'm just going to keep it default. Click on next. And from here,
+I'm just going to select the FU. This is the FU instance. And then include it as a parameter below. And then click on
+create target group. Okay. So this first one is created. Let's go back to one more. I'm
+just going to copy the name uh just so that I just don't need to write it again. So again, I'm just going to
+create it for instances. And here I'm just going to put bar and
+port HTTP. Uh that's fine. IP4 uh VPC I'm just going to choose demo NLB. And
+after that just click on next. And here I'm just going to include our let me check go previous which one we are
+creating. So we are creating a bar target group. So we need to include bar instance. So click next over here. Click
+on bar instance. Include as pending below. Click on create target group.
+Okay. So let's verify the target group. So here you can see we have a fu and bar target group created. And now we need to
+create our application load balancer. So here from the left navigation menu click
+onto the load balancer over here. Uh close this section and just click on create load balancer and then select now
+application load balancer. Click on create and the name. So let's choose ALB
+uh FUBAR LB load balancer or maybe I can keep it FU and
+bar load balancer. I think that would be good. FUAR load balancer internet facing
+IP4. That's okay. VPC I'm just going to choose demo NLBVPC. And uh availability zone I'm
+just going to choose public. And here also I'm just going to choose public. That's okay. Security group I'm just
+going to keep it default. we'll modify it later. And target group. So here we
+need to choose the target group. So first of all, let's uh uh let's choose
+any target group at the moment because we will be setting up this listener uh rules later also because this setup will
+only create a load balancer or maybe let's let's go ahead and try to create without a target group because we need
+to set up those foo and bar URL based rule. That's why I'm saying okay. Okay.
+So everything is done over here. Then click on create load balancer. Oh, it it's not allowing me. So just select
+one. So let's go with the bar and then go ahead and create a load balancer.
+Just select randomly the target uh group for this particular setup. Okay. So I'll
+just wait for a minute uh so that this particular fuar load balancer is up and
+running and then we'll start setting up those custom rules. All right. Right. So now my load balancer is up and running.
+So click on this fooar load balancer and here into the listeners and rule section. Then we need to modify this
+particular listener rule. So click on this one and here click on add rule over
+here. So first of all let's put the first rule for fu and then click on uh f
+rule and then click on next. Click on conditions. Then click on condition.
+Select path because we need to specify a path. So I'm just going to choose four. If URL ends up with the FU then it will
+redirect it to the FU instances target group. Click on confirm. Go
+next. Target group. So where we need to forward? So I just need to forward it to the FU and uh wait one. That's okay.
+Click on HTTP. Uh select HTTP. That's also fine. Then click on next. Priority
+I'm just going to put it to one over here. And after that then click on next.
+And then click on create. Okay, so the full rule has been created.
+Let's go back to fu bar load balancer. Uh then go to listeners over here. And
+here you can see the full rule. Then click on add one more rule over here. Then click on uh bar. Then bar rule
+would be nice. Click on next. Add condition. Then
+click on uh path. Put bar over here.
+Click on confirm. Click next. Target group. I'm just going to select with the
+bar. Then uh click on next. Priority two. It's just a random thing. You just
+need to assign the priority over here. But uh try to assign the priority which is like a high, low, low, and low. So
+here I'm just going to assign one, two, and there's a default rule. If nothing then it will just forward it to the
+homepage. Okay. Click on next and then click on create over here.
+And now both the rules has been created for us. Okay. So now we need to verify these rules. So go to load balancers
+over here. Then click on this DNS name and go to the URL bar and type bar over
+here and hit enter. And here you can see we are getting redirected to our demo NLP EC2 instance. So that's quite
+evident that now we have a two target group and once we are accessing our load balancer and that has a URL ending with
+a bar then it will redirect us to the uh demo NLB EC2 instance which is our bar
+instance and similarly when the URL is ending with the FU then it will redirect me to the EC21 instance which is my FU
+instance. So with that uh I have shown you like how to set up your application load balancer, how to set up your
+network load balancer, how to set up your rules for fu and bar which is possible only with the application load
+balancer and how to use your network load balancer. But I haven't talked about like what are the advantages of
+our application load balancer and our network load balancer. So these are some few arrows which I forgot to show it to
+you. But anyway, let's go ahead and talk about the advantages and disadvantages and how these works internally. So,
+application load uh load balancer work on the lay layer 7 and our network load
+balancer works on our transport layer which is layer layer number four. So in
+the layer number seven uh we are having the protocol which are supported like a WW HTTP and HTTPS but for transport
+layer 4 we only support TCP UDP that's why we were not able to set up those HTTP custom rule like a FU and bar rules
+which we have set up for application load balancer. So that's the main reason why application load balancer supports
+HTTP URL pattern but not network load balancer. So yeah these are the few uh
+few points which you can see onto the screen which we have just covered and also these are the URL pattern which we
+have also seen. Apart from that what are the other key differences? So application load balancer path path
+based routing uh TLS support and also you can configure your waft like web
+application firewall which is available into AWS with your application load balancer. So with the help of
+application load balancer you can achieve these task but in the network load balancer what you can do it it's like a
+ultra low latency load balancer. So if you have a application where millions of requests are landing onto those
+particular application then I would recommend you to use the network load balancer because it has a high throughput time. But also remember that
+you need to in that in such in some of the cases you need to specify the static
+IP for your network load balancer so that uh you can point to that network load balancer as well. So these are the
+few differences uh which I would like to mention along with the current session which we have just performed. So I hope
+with that uh your application load balancer as well as network load balancer concepts are bit clear and if
+you have any question then please put down into the comment section and in this video we are going
+Gateway Load Balancer
+to talk about the gateway load balancer on AWS. So here you can see this is our target architectural diagram which we
+are going to implement in the demo. But before we jump into the demo, let's try to understand why do we need a gateway
+load balancer and what is the purpose of a gateway load balancer in AWS. Let's
+take a very simple example to understand the gateway load balancer in AWS. So
+here I would like to take a very basic example on our amusement park. So here
+you can see onto the screen. So this is a gate to enter into the amusement park
+where a people can go and enjoy the multiple rides and enjoy the fun time with their kids. But here you can see on
+this amusement park we have a multiple gates. Here is the gate number one, gate number two, gate number three, four and
+five. So there are multiple gates through which you can enter into the amusement park. But what is the
+importance of having a multiple entry entries into the amusement park? Because there will be lots of person along with
+the kids will be planning to enter into the amusement park when there is a weekend. And suppose instead of having
+five gates, there will be only one gate. Then what will happen? Then it will create a long queue and it will take a
+lot of time for a people to enter into the amusement park. And before people
+enter into the amusement park, there is a very important thing happening because there is a uh ticket checker or
+administrator sitting onto these particular gates to verify those tickets or those tickets are valid or not so
+that a person with the kids can enter into this amusement park. So that's the important step happening in all of these
+gates and all of these gates if we don't have it and we only have a single gate then it will create a long queue and
+then it will create a lot of delay. So to avoid that then they have a multiple gates to enter into this amusement park.
+And the same concept applies for our gateway load balancer as well where gateway load balancer acts as a like a
+ticket checker which allows multiple uh incoming requests to come in and distribute that traffic towards the
+destination. I hope with the simplistic example which I have just given to you will help you to understand what's the
+importance of our gateway load balancer. Now let's put that example into the perspective of this particular
+implementation which we are going to do inside the demo. So here you can see into the middle this is our gateway load
+balancer and this gateway load balancer will allow the traffic coming from this VPC. This could be multiple traffic
+generating from this VPC to enter into this security VPC. So this is going to
+be our amusement park which you can see uh it is just an hypothetical example but just I'm providing a context with
+reference to the previous example I'm taking. So this is going to be our amusement park. So this is our VPC. This
+is going to be our ticket checker which is our gateway load balancer which is taking all the requests coming from this
+on the left hand side from our AWS course VPC. And this VPC is going to be
+our workload VPC where we will have a multiple instances running in and those
+are sending the request. So all of these requested will land onto this gateway load balancer and then it will go to
+this appliance and these appliances will do the traffic inspection. So with the
+help of gateway load balancer we enable the traffic inspection so that those traffic can be inspected before that
+traffic goes out to the internet. And similarly uh the same traffic or not
+same but if any other traffic which comes back in that it is again inspected
+gone uh goes through the gateway load balancer and then it's reached back to our EC2 instances. EC2 instances is just
+an example but here in this particular VPC which is going to be our workload VPC there could be any number of
+instances for example your Lambda your Kubernetes cluster your ECS Fargate even
+your EC2 instances. So it can be anything which is running into that particular VPC can be inspected. Now how
+we are going to implement this particular implementation of the gateway load balancer. So first we are going to
+create the AWS course VPC. Then we are going to create a security VPC and then we are going to spin up the subnets the
+public subnet private subnet and the private subnet into the security VPC. After that we are going to spin up the
+EC2 instances both here into the AWS course VPC which will be our workload
+VPC which will generate the traffic towards this gateway load balancer and then we are going to create a gateway
+load balancer and then the traffic will be thrown to this EC2 instances which is our appliances and here we are going to
+inspect that particular traffic. So that's the uh like a potential implementation we will do into the demo.
+Let's wipe everything out and we will first start with the VPC creation. So first we are going to create a AWS
+course VPC with this IP range and then we are going to create a security VPC with this particular IP range. A short
+pause over here and if you are liking these kind of a content on AWS then I have recently launched my UDMI course on
+AWS masterclass for networking and this course is 10hour long course and it
+includes 100 plus chapter which you can see there are various section and each section of this particular course
+include multiple chapter along with the demos. The course is divided into the three level. One will start with the
+basic level. Second will be the intermediate level and third will be the expert level and at the end of this
+particular course you will see a terapform which we quite use a lot in the industry. So I will give you a
+really good walk through and demos including the terraform plus networking followed with a devops project where we
+will be using all the concepts which we have learned in this particular course so far and in which certification this
+particular course is going to help you. So it is going to help you in like a cloud practitioner, developer associate,
+devops engineer, sysop administrator, advanced networking, solution architect
+and professional solution architect certification if you are planning to do those certification for AWS. Please find
+the course link into the description section with the discount code and let's get back to the topic. So let's close
+this window over here and get back to our AWS console. So here you can see this is my AWS console and here I'm
+going to click on create VPC. Here I'm going to select the VPC only option and then I will put the VPC name. So that is
+going to be my VPC name. This is the IP range. So I'm going to put the IP range as I told you and it's going to end with
+/16. After that go at the bottom and click on create VPC. And this will
+create your first VPC into our uh uh Stockholm region which is going to be
+our AWS course VPC which is this one. Let's create the security VPC with this
+particular IP range which is 81.0.0/16. So again follow the same step. Go back to your AWS console. Go to
+your VPC. Click on create VPC and here we are going to put the name. So here I'm going to put security EU N1 uh
+VPC. The IP range I'm going to assign
+81.0.0.0/16 and the tenency default and then at the bottom click on create
+VPC and here you can see our both the VPCs has been created which you can verify from here. So here you can see uh
+the AWS course VPC and the security VPC. Let's move further and see what are the
+next component which we need to create. So here you can see the next component which we need to create is the subnet.
+So here we are going to create our first subnet into our security VPC. And the same way we are going to create our
+public subnet as well as private subnet into our AWS course VPC. So let's first
+try to create the subnet and then we are going to take a look about the internet gateway and the route table and this
+will be done in the here as well. So in the private subnet we will only focus on
+the route table in our security VPC as well as into our AWS course VPC. But
+let's let's try to create the subnet first which is this one. Uh this one and this one. Okay. So I'll close this
+window over here. Go back to my AWS console. And here I'm going to choose click on this subnet. Click on create
+subnet over here. And here first let's work on the AWS course VPC. So choose
+that one. And here we need to create a subnet. So here uh the name of the subnet which I'm going to put I'll copy
+it from my notepad and put it over here which is going to be AWS course EUN1 subnet uh public subnet over here. And
+here I'm going to put 1 A. And the 1 A is because I'm going to work into 1 A
+availability zone. Select that one. The cider range. This is the cider range of our VPC. And here I'm going to put the
+cider range for my subnet. So that is going to be this one. All right. So this
+is going to be my public subnet. I'll copy the name and create add one more subnet here. Put the paste the name and
+choose this one as a private subnet. And then make it as a 1B. Put it into 1B
+availability zone. And the cider range I'm going to put is
+2.0/24. And then click on create subnet over here.
+And our both the subnets has been created. If you take a look onto this particular diagram, then here you can
+see this subnet and this subnet has been created. I need to fix the IP address over here which is wrong. It should be
+two over here. All right. So now we have created the subnet and here which you can see and I have updated the IP
+address here as well. Now let's create a private subnet here into our security VPC as well with this IP range. So I'll
+close this window over here and go back to my AWS console and here I'm going to
+click on create subnet which you can see select the uh VPC which is going to be a security VPC and here I need to enter
+the subnet name. So here I'm going to choose security uh EU N1 and then we can choose private
+subnet. After that availability zone I'm going to choose 1 A. The IP range which we are going to specify over here is
+1.0/24 and then go at the bottom and click on create subnet and here we have
+created the private subnet in our security VPC which is this one. So this
+is also done. Now let's try to work on this particular internet gateway and this internet gateway is going to be
+created for this public subnet. All right. So I'm going to close this one over here and let's get back to AWS
+console and here on the left hand side you will find option for internet gateway. So click on create internet
+gateway and the name of the internet gateway which I'm going to put over here is for AWS course. So I will copy the
+name and paste it over here and remember this is internet gateway in AWS course
+VPC. So if you take a look onto this diagram then here we are working onto this one and here internet gateway is
+here. So that's why the name of the internet gateway is AWS course. So get back and put the name click on create
+VPC uh sorry uh internet gateway. Now the next thing is let that you need to
+attach this internet gateway to this particular VPC. All right. Now let's get
+back go to actions over here. Click on attach VPC. Select the VPC which is going to be AWS course and then click on
+attach internet gateway. So that internet gateway has been attached to our AWS course. What is the next
+component? So let's get back to the diagram. And now we need to create the route table. One is going to be public
+and one is going to be our private route table. And one more route table we will need in the security VPC subnet as well.
+So keep in mind all the components we are going to create through this diagram. There is no any explicit other
+component which we are going to create. any other thing not not uh not away from
+this diagram. Everything from should be from this particular diagram. Okay,
+let's start creating then route table. So on the left hand side, click on the route tables. Click on the create route
+table and here we are going to put the name. And first we are going to create the public and private route table for
+AWS course VPC. So here I will just try to copy the name. So first let's create
+the uh public route table AWS course and public route table. VPC should be AWS
+course and then click on create route table over here. All right, the first route table, the public route table has
+been created. Let's create one more route table. Go over here, click on create route table, put the name and
+make it as a private route table. All right, select the VPC which is going to be AWS course one and then click on
+create route table over here. All right, so now if you take a look onto the diagram then what we have done, we have
+created this public route table. We have created this private route table. Now let's create a this route table for
+security VPC as well. Close this one. Go back and here click on route tables.
+Click on create route table. Name it security uh route EU N1 route table. And this is
+going to be private route table as well. And click on security VPC because why
+private route table? Because there is no internet gateway which you can see attached to this subnet. All right. Now
+let's go and click on create route table. Okay, all the route table has been created. Now after creating the
+route table, let's fix some of the attachment and the routes. So first of all, we need to set up the route for
+internet gateway into this particular route table because this is going to be our public route table. And also this
+route table needs to be associated with public subnet. This route table, private route table needs to be associated with
+this private subnet. And this route table has to be associated with this private subnet. So let's do first this
+association work and then we will create attach the or create the route for internet gateway. So I'll close it. Go
+back and uh let's start from the route table. So here let's start with our
+public Stockholm route table. Uh sorry uh which is public
+stockhome which is this one for our AWS course. So let's click on this route table. Click on subnet association. And
+this is going to be public subnet. So here let's uh click on edit subnet association. And here I'm going to
+choose the public subnet. Click on save association. All right. So here you can see our public route table has been
+associated with the public subnet. Same thing we need to do it with our private route table of AWS course which is this
+one. Select that one. Click on subnet association. Click on edit subnet. And
+here select your private subnet and click on save association. All right. Now, uh we have done the association
+between these and these. Let's try to do the association for this security VPC subnet
+and route table as well. So for that go back and uh go to route table. Click on
+the security route table which is this one. Select that one. Click on subnet association. Click on edit subnet.
+Select the subnet. Click on save association. So that's done. So if you
+take a look onto this diagram then we have done this we have done this we have done this one also. All right. Now we
+need to only work on this public subnet public route table and attach this or
+create this route for internet gateway because this is the only uh route table
+or the subnet which is public. All right I'll close this one. Go back and go to
+the route table and here into my public route table which is this one. Click on
+this route table click on addit route. Here we need to create a route for internet. So here I'm going to put the
+address which is 0.0.0.0 which is our public internet route. After that select the internet
+gateway and select the internet gateway option which we have just created uh in our demo this particular demo. Select
+the internet gateway. Then click on save changes. And here you can see the route is there now. So now if you take a look
+onto this particular diagram then we pretty much implemented the VPC then internet gateway then route table then
+subnets which you can see. So everything has been there. So this is also there. This is also there. Same here. This is
+also there and this is also there. Okay. Now the only thing which is pending is now we need to spin up the EC2s over
+here into all of the three uh subnets which is two into AWS course VPC subnets
+and one into security VPC subnet. Okay. And then we will going to work onto the
+gateway load balancer. I'll jump to the uh AWS console and I'll search for a EC2
+over here. Click on this EC2 and first EC2 we are going to create
+is into this particular uh subnet which is our public subnet and this is going to be our first virtual machine. So this
+is going to be called as a public virtual machine. So go back to our AWS console. Close this uh arrow and then
+click on the launch instances and here we are going to put
+AWS [Music] course public VM. Okay. After that we
+are going to select the Ubuntu and here we are going to select this EMI image that's fine. T3.micro which is also
+fine. And here we need to select the key pair. So here I'm going to choose uh our
+this key pair I have already created. If in case you don't want to use existing
+one then here you can click and create your new key pair which we can use later on to login into our uh Linux machine.
+So click on this one and then it will download you the private key. Don't worry I'm going to show you once we are
+going to login into this virtual machine. But anyway, if you don't have it, then just click on this and create a
+new key pair and download that particular private key. All right. Now, click on network setting, click on edit,
+go to the VPC and select the AWS core CUN1. And this is going to be our public
+uh subnet. So here we need to choose the public subnet. Go back and from the
+drop-down select the public subnet. enable the public IP and uh after that
+we need to yeah we need to enable this security group which is SSH and also
+let's add one more security group which is ICMP okay that's been done so that we
+can ping from anywhere click on anywhere and then click on launch instances so
+this is going to be launch this is going to launch our public instance let's go and
+check so this uh instance is running so there are some text which will uh work
+in parallel. But in the meantime, let's copy this name because we need to uh we
+need to create our private instance as well. So let's take a look onto the diagram. So here we did this part. Let's
+try to work on this part as well. Okay, this is going to be the private EC2 instance. So close this one. Go back and
+click on launch instances. Uh put the name and change it
+to now private VM. Then go to Ubuntu over here and then select the T3.micro
+same. Uh keep pair I'm going to choose the same one which is this one. Uh click
+on edit which is important. Select the VPC which is going to be AWS course and
+here subnet is going to be private. So if you take a look onto this particular diagram then here this is going to be
+into private subnet. Okay. Go further. Uh public IP. No, we
+don't we cannot assign the public IP because it's a private subnet. Uh the instance is running to going to run into
+private subnet. After that, click on add security group. Click on uh ICMP uh
+allow anywhere so that you can ping uh this EC2 instance. And after that, click on launch
+instances. All right. So that's been done. It's running now. Okay. So let's
+take a look onto the diagram. So what we have done? So we have done this EC2 instance. We have done this EC2 instance
+and we are pretty much done from AWS course VPC. Let's jump to security VPC and they are going to spin up and this
+particular EC2 instance. All right. So here uh what we are going to
+do uh one more thing I forgot to tell you that uh this particular EC2 instance
+uh which is running into this particular appliances will need a internet gateway. So here we are going to attach an
+internet gateway and this internet gateway I'm attaching just to show you that this instance is able to inspect
+the traffic. That's the only reason I'm going to attach an internet gateway over here. Uh otherwise I will not be able to
+show you that how I am going to inspect the traffic once this traffic is thrown over here through the gateway load
+balancer. So what I will do uh let's jump before we create the EC2 instance.
+Let's first fix the internet gateway over here. So although I'm mentioning that this is a private subnet but uh
+once I attach a internet gateway then this will not be a private subnet but this is just for a demo purpose because
+I'm showing this whole demo to you that's why I'm attaching to it. All right so that's the explanation I just
+wanted to put it up front. All right so let's get back and uh go to VPC and
+first let me create a internet gateway and click on internet gateway.
+So here I will put like a security VPC IGW. Click on create internet gateway
+over here. Uh go to actions. Click on attach. And here I'm going to attach to
+our security VPC. Attach to this one. Click on attach internet gateway. And
+this is attach. Now we need to work on this particular route table to modify
+that particular route. So close this one. Go back and go to route table.
+Click on security uh uh route table and here click on edit route. Click on add
+route and add route for there. Select internet gateway and select the internet gateway which we have just created.
+Select that one and save changes. All right. So that's an exception I'm giving to this particular uh security uh not
+security but this particular route table of security VPC and VPC security subnet.
+I hope you're enjoying this sessions and if you're really liking this session then please considering subscribing to
+this channel and I'm soon launching my UDMI course on AWS. So please stay tuned. I will be posting the link as
+well as if you are interested then you can follow me onto my YouTube channel membership which is uh also a paid
+membership where you will get a quite a lot of insightful videos which are not available for everyone. So here in the
+membership section you can see quite a lot of videos which I have already published. So please go and check that
+one out and also look out for ODMI course which I'm going to release very soon for AWS. Let's go further and here
+we are going to create this particular EC2 instance which is going to be our appliance. All right. So here I'll go
+back to my AWS console. Click on EC2 over here. And here you can see there are two already running. So let's go
+further down. Click on launch instances over here. And here I'm going to put like a security uh VPC uh security
+virtual machine. I will put it EU N1 and virtual machine. Okay. Click on
+Ubuntu over here. Click on T3 micro. That's fine. Select the key which is
+going to be my this key. Click on edit setting. Select the VPC. So here we are
+going to choose the security VPC. And here we are we have only created a single subnet. Select that one. And
+after that we are going to create uh the security group over here to allow the
+ping. So here I'm going to select the ICMP and uh select from anywhere and
+then click on launch instances over here. And that's uh going to launch my
+EC2 instance into our this particular security subnet which is this
+one. All right, let's close this one over here. And here you can see there
+are three uh EC2 instances which has been launched. Two into AWS course VPC and one into our security uh VPC. Now
+the next thing is we need to set up our gateway load balancer. And this gateway load balancer we need to set up. Uh if
+you take a look onto this particular diagram then here we are going to set up the gateway load balancer. But to set up
+a gateway load balancer over here we also need to create a target group. So this is going to be a target group over
+here. And in this target group we are going to put this particular EC2 instance so that that gmail load
+balancer can point to this particular EC2 instance through the target group. And this target group can contain
+multiple EC2 instances. Right now I'm just doing the demo. So that's why I'm putting it only one EC2 instance. But it
+can have multiple EC2 instances over there. And everything we will work will
+work into this security VPC. All right. So let's do one thing. Let's close this one and get back to our uh AWS console.
+And here what we are going to do uh on the left hand side we are going to go into the load balancing. go on to the
+target groups. Click on this one. Click on create target group. And here I'm going to create a target group for
+instances. And here the target group name. So here I'm going to put a security
+uh uh gateway lb uh target group. Uh the
+protocol port is going to be HTTP. Uh let me check that one. So this is going to be sorry this is not going to be
+HTTP. This is going to be engine protocol because that is used for gateway load balancer. So which you can
+see over here. Select that one and this is going to run on port 6081. So keep in mind VPC. So if you take a look. So here
+we are creating a target group for this gateway load balancer and is created into security VPC. So we are going to
+use the same security VPC. All right. Close that one and uh select the VPC
+which is going to be our uh security VPC over here. That's done. Health check,
+keep it TCP and then click on next. And here you can see this is the VM uh the
+name of the VM which we have created. So this is the VM which we need to include into this particular target group which
+we are planning to create over here. So this will be included into this one. Okay. So close this one and select this
+one this particular virtual machine include as pending below and then click on create target group. So this will
+create a target group for our gateway load balancer. And now we are going to create a gateway load balancer. Now on
+the left hand side again in the load balancing section here click on the load balancers. Click on create load balancer
+over here and choose the gateway load balancer which you can see. Select the create gateway load balancer. The name
+of the load balancer. So here I'm going to put security gateway LP which is gateway load balancer. load balancer
+type keep IPv4 and uh VPC select the security VPC over here availability zone
+select this availability zone because uh that's the only subnet we have in this availability zone here target group
+which we have just created select that target group and after that go further down and here you can verify the summary
+of it and then just go and click on create load balancer and here you can see the load
+balancer has been created So it is into provisioning state and it will take at least 3 to 4 minute to provision this
+particular gateway load balancer. So I'll be back once this gateway load balancer has been created and then we
+can start working on the next steps. So after a couple of minute I can see my load balancer is into active state and
+the key thing which you need to verify over here is the uh health status of our EC2 instance. So here at the bottom
+click on the security uh target group which we have created for our load balancer and the instance
+state should be healthy over here. And also one more thing if the instance state is not coming healthy then please
+check the instance which is our EC2 instance and you have the security group uh like which enables the port 80. I
+think I have not created this security group but later on I have verified that this security group needs to be added so
+that it that uh uh our load balancer and target group are in healthy state. So
+make sure that this port is running and uh not running but you have created into the security group. So right now you can
+see uh our load balancer uh the gateway load balancer is up and running and the target group is in into our healthy
+state. uh moving further now we need to enable this uh traffic flow between these two VPCs and to enable this
+traffic flow what we need to do is we need to enable the crossVPC communication right now both VPCs are
+different but they are not able to communicate with each other so to enable this communication we need to work on
+VPC endpoint and VPC endpoint service so what we are going to do so what we are
+going to do is we are going to create a VPC endpoint service I'm putting S so that denotes the VPC endpoint point
+service and here we are going to create a VPC endpoint. So that VPC endpoint
+service will be for gateway load balancer and this endpoint will be only for uh gateway load balancer endpoint
+and this endpoint we are going to configure into this route table. So any traffic coming from this EC2 instance
+will go will check the route into route table. We'll find this endpoint over
+here and this endpoint will redirect to this service and then from here it will be able to find the gateway load
+balancer and then traffic will flow over here. So this is how this whole flow going to look like. So first so first
+let's try to set up this endpoint service for our gateway load balancer. So let's get back to our AWS console and
+here on the left hand side in uh let's go to the VPC first and also one more
+thing if you don't know about the VPC endpoint then here is the already a video which I have prepared in the past.
+So please go and check this particular video where I have explained what the VPC endpoint is and how to use that VPC
+endpoint. So that that's just for your reference in case you are not familiar with the VPC endpoint. All right let's
+get back to the topic. So here uh on the left hand side into the VPC section you will find the option for a VPC endpoint
+uh service actually uh oh so this is a EC2 dashboard so click on this VPC and
+on the left hand side you will find the endpoint service click on this endpoint service click on create endpoint service
+put the name so here I'm going to put the gateway LB uh
+endpoint service select gateway option here and select the gateway load balancer uh
+cross region no we don't want we are working in the same region so that I'm going to put it and here just unselect
+this box otherwise you need to do uh once you create this service once you create a endpoint then you need to
+accept the request but let's let's skip that particular option over here after
+that what we need to do we just need to click on create this endpoint service and here you can see this endpoint
+service has been created so let's take a look onto this diagram so we have created this endpoint service. Now let's
+create a VPC endpoint into our AWS course VPC. So let's close this diagram
+over here. Go back and here on the on the VPC section go to the same uh like
+endpoint service and endpoint. Now we have created the endpoint service. Let's create the endpoints over here. Click on
+the endpoint. Click on the create endpoint. And here we need to put the name. But also one more thing which you
+need to keep in mind that we need to copy the name of the VPC endpoint service. So
+here let's select this particular endpoint service NLB gateway load balancer. And here uh in the service
+settings section you will find the option for a service name. So we need to provide a service name which we have
+just created. So for that I'm going to open into the new tab and I'm just going to copy the endpoint service name. So on
+the left hand side click on endpoint service. So this is the endpoint service which we have created. So here you will
+find a service name option. So copy this particular one from here and get back
+over here and paste it over here. Sorry I have not copied. So let's go back and again try to copy this particular
+service name from here and try to paste it and click on verify service and here
+you can service name has been verified. So now uh our service name has been verified and now we are going to create
+an endpoint. So right now if you take a look onto this particular diagram then here we are creating the endpoint over
+here and this endpoint is using the name of the service which we have already created over here.
+Okay. All right. So let's get back over here and here the VPC. So now we are
+going to work on to our AWS course VPC subnet. Uh so select the subnet
+which is this one and select the subnet which we have created over here. After that uh let's go and click on create
+endpoint and here you can see our endpoint is just getting created and it will take a few minutes to create this
+particular endpoint and I'll be back once this endpoint is up and ready. Now you can see that my VPC endpoint is
+ready. Now the next thing which we need to do is we need to update the route table for this VPC endpoint which you
+can see ending with the CC C3. So if I go back to my diagram over here then
+what we will do we have created this endpoint over here uh which is this one and this is the endpoint service which
+is over there. So now I'm going to update the my private route table with this particular endpoint so that
+anything any traffic which is uh running on EC2 will go and check the route in EC2 uh of this private route table and
+then it will find the endpoint and then the route will uh this endpoint will forward it to the security the endpoint
+service and then it will go to the gateway load balancer. So let's go and check this particular route table to
+modify the route and use this endpoint. So here I'm into the VPC section. So here click on the route table and
+remember that we are taking a look onto this private route table which is belonging to this private subnet of our
+AWS course. All right. So here let's get back and check a private route table
+which is this one which is this one which you can see. Click on edit route. Click on add route and I want all the
+traffic of this particular private subnet to be forwarded to the global load balancer endpoint. And the VPC
+endpoint is ending with this ID which is CC3 which I have specified. Select that one. Click on save changes. And now our
+route has been modified. All right. So now how we will verify this whole
+connectivity. So to verify this whole connectivity what we will do? We will just log into this particular EC2
+instance. And here we are going to run the TCP dump of our uh network and then
+it should show the IP of this particular EC2 instance which is this one. All right. So first uh let's try to see what
+is the private IP of this EC2 instance which is running into private subnet. Uh let's go and check that one first. So
+I'll close this one and uh I'll open into the new tab and go to the instances
+and here the private instance IP should be we should be able to find by clicking
+on this instance ID and it is 163. All right. Also one more thing we need to
+login into this EC2 instance which I'm trying to tell is like this EC2 instance
+we need to login and here the uh IP address which is ending is 169. Let me
+recheck uh once again. So if I go over here let me close this one and sorry it
+is 163. So here uh if I draw it then here it should be 163 ending with and I
+will now try to login into this EC2 instance and this IP range should be 81.0 0 dot I think the IP address is uh
+50 sorry one let me let me check actually so if I go over here I go on
+EC2 click on this instances click on the security instance and here it is 251
+right and this is the public IP address so I'll go on click on connect copy this
+command to login into the CC2 instance and here I'm just going to open one more
+terminal And then I'm just going to bring that terminal over here. Just give me a minute. And here you can see this
+is the terminal. And here I will just go to the directory where I have downloaded my
+keys. And here I'm just going to paste the command. Okay. And uh now what I need to
+do is I need to run the command on TCP dump. So that command I'm going to show you. So here just clear the screen and
+then paste the command. All right. So right now I am sitting into this EC2
+instance and this EC2 instance IP is ending with 163. So we should be able to
+see the logs inside here in this EC2 instance of TCPA. And uh let's get back
+over here. I'll close this one uh and then run it this command. And here uh if you take a look
+if I close this one over here then here you can see uh let me draw it once again. So here you can see the TCP dump
+is coming in. All right. So which means our uh network traffic uh are being
+forwarded to this particular EC2 instance which you can see which we are able to find it out. So that means our
+gateway load balancer has started to work. Now if I take a look then this particular EC2 instance traffic with
+this particular route table is getting inspected with forwarded with the get
+load balancer and it is ready to be inspected into this particular EC2 instance. So that's how this whole flow
+is working and this EC2 instance IP address is ending with 163 and here this is the IP this is the appliance which I
+have already logged in which you can see into uh this terminal which is ending with 81 uh
+810.1.251 and this is the IP address which we have inspected. So this is how you will set up this gateway load
+balancer to inspect your traffic.
+
